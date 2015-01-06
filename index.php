@@ -1,4 +1,5 @@
 <?php
+require_once("configure.php");
 
 //define your token
 define("TOKEN", "weixin");
@@ -11,6 +12,11 @@ if (isset($_GET['echostr'])) {
 
 class wechatCallbackapiTest
 {
+	public function __construct()
+	{
+		$mysql = new SaeMysql();
+	}
+
     public function valid()
     {
         $echoStr = $_GET["echostr"];
@@ -70,10 +76,37 @@ class wechatCallbackapiTest
                 echo $resultStr;
             }
             else if(!empty($keyword)){
-                $msgType = "text";
-                $contentStr = $this->tuling($keyword);
-                $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
-                echo $resultStr;
+            	if($keyword == "123")
+            	{
+            		$msgType = "text";
+            		$mysql = new SaeMysql();
+					$sql = "SELECT * FROM data";
+                        $ret = $mysql->getData($sql);
+					    if ($ret == false) {
+					    	//echo "die";
+					    	$contentStr ="die<br />";
+					        die("Select Failed: " . mysql_error($link));
+					    } else {
+					     	$i=0;
+					     	$contentStr ="Select Succeed!<br/>";
+							foreach($ret as $k=>$v)
+							{
+								$i=$i+count($v);
+							}
+							for($j = 0;$j < $i;$j++){
+								$contentStr .= $ret[$j]['name']."<br/>";
+							}
+						}
+						$resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
+            			echo $resultStr;
+            	}
+            	else
+            	{
+            		$msgType = "text";
+	                $contentStr = $this->tuling($keyword);
+	                $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
+	                echo $resultStr;
+            	}
             }
             else{
                 echo "Input Something...";
@@ -93,7 +126,7 @@ class wechatCallbackapiTest
             $re = "<a href=\"".$result['url']."\">".$result['text']."</a>";
         }
         else{
-            $re = "我还不够机智，需要学习！不断地学习！";
+            $re = "我还不够机智！";
         }
         return $re;
     }
