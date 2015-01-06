@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once("configure.php");
 
 //define your token
@@ -12,10 +12,10 @@ if (isset($_GET['echostr'])) {
 
 class wechatCallbackapiTest
 {
-	public function __construct()
-	{
-		$mysql = new SaeMysql();
-	}
+    public function __construct()
+    {
+        $mysql = new SaeMysql();
+    }
 
     public function valid()
     {
@@ -76,34 +76,40 @@ class wechatCallbackapiTest
                 echo $resultStr;
             }
             else if(!empty($keyword)){
-            	if($keyword == "123")
-            	{
-            		$msgType = "text";
-            		$mysql = new SaeMysql();
-					$sql = "SELECT * FROM data";
+                $keywords = explode("+",$keyword);
+                if(trim($keywords[0] == '绑定'))
+                {
+                    $msgType = "text";
+                    $mysql = new SaeMysql();
+                    //将￥keyword根据加号分割成数组
+                    
+                    //获取当前时间
+                    $nowtime=date("Y-m-d G:i:s");
+                    if(trim($keywords[1])==null)
+                    {
+                        $contentStr ="绑定个名称吧！";
+                    }
+                    else{
+                         $sql = "SELECT username FROM user WHERE username='".$fromUsername."'";
                         $ret = $mysql->getData($sql);
-					    if ($ret == false) {
-					    	//echo "die";
-					    	$contentStr ="爆炸！";
-					        die("Select Failed: " . mysql_error($link));
-					    } else {
-					     	$i=0;
-					     	$contentStr ="Select Succeed!\n";
-                            foreach($ret as $row)
-                            {
-                               $contentStr .= $row['id']." | ".$row['name']."\n";
-                            }
-						}
-						$resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
-            			echo $resultStr;
-            	}
-            	else
-            	{
-            		$msgType = "text";
-	                $contentStr = $this->tuling($keyword);
-	                $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
-	                echo $resultStr;
-            	}
+                        if ($ret == true) {
+                            $contentStr ="绑定过了~~~";
+                        } else {
+                            $sql = "INSERT INTO user(username,alias,time,usable) VALUES('".$fromUsername."','".$keywords[1]."','".$nowtime."','1')";
+                            $mysql->runSql($sql);
+                            $contentStr ="绑定成功！";
+                        }
+                    }
+                    $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
+                    echo $resultStr;
+                }
+                else
+                {
+                    $msgType = "text";
+                    $contentStr = $this->tuling($keyword);
+                    $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
+                    echo $resultStr;
+                }
             }
             else{
                 echo "Input Something...";
