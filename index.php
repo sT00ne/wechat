@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once("configure.php");
 
 //define your token
@@ -84,18 +84,15 @@ class wechatCallbackapiTest
                         $ret = $mysql->getData($sql);
 					    if ($ret == false) {
 					    	//echo "die";
-					    	$contentStr ="die<br />";
+					    	$contentStr ="爆炸！";
 					        die("Select Failed: " . mysql_error($link));
 					    } else {
 					     	$i=0;
-					     	$contentStr ="Select Succeed!<br/>";
-							foreach($ret as $k=>$v)
-							{
-								$i=$i+count($v);
-							}
-							for($j = 0;$j < $i;$j++){
-								$contentStr .= $ret[$j]['name']."<br/>";
-							}
+					     	$contentStr ="Select Succeed!\n";
+                            foreach($ret as $row)
+                            {
+                               $contentStr .= $row['id']." | ".$row['name']."\n";
+                            }
 						}
 						$resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
             			echo $resultStr;
