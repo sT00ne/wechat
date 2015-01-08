@@ -96,7 +96,7 @@ class wechatCallbackapiTest
         if(!empty($keyword)){
         	if(strtolower(trim($keyword)) == "help" || trim($keyword) == "帮助"){
                 //帮助信息
-        		$contentStr = "*绑定+您的姓名:以绑定账号"."\n"."*改名+您的新姓名:以修改绑定的姓名"."\n"."*解绑:以解除绑定账号"."\n"."*也可以随意输入文字哟！";
+        		$contentStr = "*绑定+您的姓名:以绑定账号"."\n"."*改名+新姓名:以修改绑定姓名"."\n"."*解绑:以解除绑定账号"."\n"."*也可以随意输入文字哟！";
         		$resultStr = $this->responseText($postObj, $contentStr);
     			return $resultStr;
         	}
@@ -109,7 +109,7 @@ class wechatCallbackapiTest
         		$msgType = "text";
         		$mysql = new SaeMysql();
                 //获取当前时间
-                $nowtime=date("Y-m-d G:i:s");
+                $nowtime=date("Y-m-d");
                 if(trim($keywords[1])==null)
                 {
                     $contentStr ="绑定个名称吧！";
@@ -121,7 +121,7 @@ class wechatCallbackapiTest
                         if ($ret[0]['usable'] == 1) {
                             $contentStr ="绑定过了~~~";
                         }else{
-                            $sql = "UPDATE user SET usable = 1,alias = '".trim($keywords[1])."' WHERE username = '".$fromUsername."'";
+                            $sql = "UPDATE user SET usable = 1,alias = '".trim($keywords[1])."',time = '".$nowtime."'WHERE username = '".$fromUsername."'";
                             $mysql->runSql($sql);
                             $contentStr ="绑定成功！";
                         }
@@ -176,6 +176,26 @@ class wechatCallbackapiTest
                     } else {
                         $contentStr ="还没绑定过~~~";
                     }
+                }
+                $resultStr = $this->responseText($postObj, $contentStr);
+                return $resultStr;
+            }
+            else if(trim($keyword) == '我'){
+                //解除绑定
+                $mysql = new SaeMysql();
+                $sql = "SELECT username,usable FROM user WHERE username='".$fromUsername."'";
+                $ret = $mysql->getData($sql);
+                if($ret == true){
+                    if($ret[0]['usable'] == 1){
+                        $sql = "select alias,time from user WHERE username = '".$fromUsername."'";
+                        $ret = $mysql->getData($sql);
+                        $contentStr = "姓名:".$ret[0]['alias']."\n"."绑定时间:".$ret[0]['time'];
+                    }else{
+                        $contentStr = "还没绑定过~~~";
+                    }
+                }
+                else {
+                    $contentStr = "还没绑定过~~~";
                 }
                 $resultStr = $this->responseText($postObj, $contentStr);
                 return $resultStr;
